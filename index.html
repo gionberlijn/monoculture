@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex">
+<title>MONOCULTURE</title>
+<style>
+  /* Wrapper for monoculture.gionberlijn.com, hosted statically (GitHub Pages).
+     It only frames the composer that the feed engine serves through Tailscale Funnel.
+     The engine's own page carries the whole design; this page stays invisible. */
+  html, body { margin:0; height:100%; background:#000; color:#e7e9ea; }
+  iframe { display:block; width:100%; height:100%; border:0; background:#000; }
+  #offline { display:none; box-sizing:border-box; height:100%; padding:16px;
+    max-width:560px; margin:0 auto;
+    font: 17px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  #offline .brand { font-weight:700; letter-spacing:.25em; margin-bottom:12px; }
+  #offline p { color:#71767b; margin:0; }
+  body.down iframe { display:none; }
+  body.down #offline { display:block; }
+</style>
+</head>
+<body>
+<iframe id="feed" title="MONOCULTURE" allow="clipboard-write"></iframe>
+<div id="offline">
+  <div class="brand">MONOCULTURE</div>
+  <p>The feed is offline right now.</p>
+</div>
+<script>
+(function () {
+  // ===== The only line to change: the engine's public Tailscale Funnel address. =====
+  // Currently the MacBook (test). Change to the Asus's address before TURF.
+  var FEED = "https://macbook-pro-van-gion.taild5b161.ts.net";
+  // ===================================================================================
+
+  var frame = document.getElementById("feed");
+
+  // Check the engine is reachable before showing the composer. A cross-site iframe
+  // can't tell us it failed to load, so we ping it instead. "no-cors" means we can't
+  // read the answer, but the promise only resolves if the server actually answered.
+  function check() {
+    var done = false;
+    var timer = setTimeout(function () { if (!done) { done = true; down(); } }, 8000);
+    fetch(FEED + "/post", { mode: "no-cors", cache: "no-store" })
+      .then(function () { if (!done) { done = true; clearTimeout(timer); up(); } })
+      .catch(function () { if (!done) { done = true; clearTimeout(timer); down(); } });
+  }
+  function up() {
+    if (!frame.src) frame.src = FEED + "/post";
+    document.body.classList.remove("down");
+  }
+  function down() {
+    document.body.classList.add("down");
+    setTimeout(check, 15000);   // keep retrying, so the page recovers by itself
+  }
+  check();
+})();
+</script>
+</body>
+</html>
